@@ -61,3 +61,66 @@ cd q-shield-health
 uv venv
 source .venv/bin/activate
 uv pip install -e .
+
+```
+
+---
+
+## Linha de Comando (CLI)
+
+O `qshield` oferece comandos simples para geração de chaves, cifragem e decifragem.
+
+### 1. Gerar Par de Chaves PQC
+
+```bash
+uv run qshield keygen --out . --alg ML-KEM-768
+
+```
+
+### 2. Cifrar Arquivo Genômico
+
+```bash
+uv run qshield encrypt \
+  --input sample.fastq \
+  --output sample.fastq.qgh \
+  --pubkey genomic_pqc.pub \
+  --alg ML-KEM-768
+
+```
+
+### 3. Decifrar e Restaurar Dados
+
+```bash
+uv run qshield decrypt \
+  --input sample.fastq.qgh \
+  --output restored_sample.fastq \
+  --seckey genomic_pqc.key
+
+```
+
+---
+
+## Qualidade & Testes
+
+Para garantir conformidade de código e segurança em produção, execute a suíte automatizada:
+
+```bash
+# Executar testes unitários e de integração
+uv run pytest -v
+
+# Linter e verificação de estilo (Ruff)
+uv run ruff check .
+
+# Análise estática de tipos (Mypy)
+uv run mypy src/
+
+# Executar o teste de integração E2E
+uv run python benchmarks/test_cli_flow.py
+
+```
+
+---
+
+## Licença
+
+Veja `LICENSE` para mais detalhes.
