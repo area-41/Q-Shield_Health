@@ -1,7 +1,7 @@
 """Engine criptográfica de alto desempenho combinando ML-KEM (FIPS 203) e AES-256-GCM."""
 
 import hashlib
-from typing import Tuple
+
 from kyber_py.kyber import Kyber768, Kyber1024
 
 # Identificadores do Protocolo
@@ -59,7 +59,9 @@ def generate_pqc_keypair(algorithm: str = "ML-KEM-768") -> Keypair:
         raise KeyGenError(f"Falha ao gerar par de chaves ML-KEM: {err}") from err
 
 
-def encapsulate_dek(public_key: bytes, algorithm: str = "ML-KEM-768") -> Tuple[bytes, bytes]:
+def encapsulate_dek(
+    public_key: bytes, algorithm: str = "ML-KEM-768"
+) -> tuple[bytes, bytes]:
     """Encapsula uma Chave de Criptografia de Dados (DEK) usando ML-KEM.
 
     Returns:
@@ -76,7 +78,9 @@ def encapsulate_dek(public_key: bytes, algorithm: str = "ML-KEM-768") -> Tuple[b
     return ciphertext, dek
 
 
-def decapsulate_dek(ciphertext: bytes, secret_key: bytes, algorithm: str = "ML-KEM-768") -> bytes:
+def decapsulate_dek(
+    ciphertext: bytes, secret_key: bytes, algorithm: str = "ML-KEM-768"
+) -> bytes:
     """Decapsula a chave simétrica DEK utilizando a chave secreta PQC."""
     if algorithm == "ML-KEM-768":
         shared_secret = Kyber768.decaps(secret_key, ciphertext)

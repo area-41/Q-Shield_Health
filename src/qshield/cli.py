@@ -1,8 +1,10 @@
 """Interface de Linha de Comando (CLI) profissional usando Typer."""
 
 from pathlib import Path
+
 import typer
 from rich.console import Console
+
 from qshield.crypto.engine import generate_pqc_keypair
 from qshield.io.stream import decrypt_genomic_stream, encrypt_genomic_stream
 
@@ -16,8 +18,12 @@ console = Console()
 
 @app.command("keygen")
 def keygen(
-    out_dir: Path = typer.Option(Path("."), "--out", "-o", help="Diretório de saída das chaves"),
-    algorithm: str = typer.Option("ML-KEM-768", "--alg", "-a", help="Algoritmo PQC (ML-KEM-768 / ML-KEM-1024)"),
+    out_dir: Path = typer.Option(
+        Path("."), "--out", "-o", help="Diretório de saída das chaves"
+    ),
+    algorithm: str = typer.Option(
+        "ML-KEM-768", "--alg", "-a", help="Algoritmo PQC (ML-KEM-768 / ML-KEM-1024)"
+    ),
 ) -> None:
     """Gera um par de chaves pós-quânticas ML-KEM."""
     console.print(f"[bold blue]Gerando par de chaves PQC ({algorithm})...[/bold blue]")
@@ -38,9 +44,15 @@ def keygen(
 
 @app.command("encrypt")
 def encrypt(
-    input_file: Path = typer.Option(..., "--input", "-i", help="Arquivo genômico de entrada (FASTQ/BAM/VCF)"),
-    output_file: Path = typer.Option(..., "--output", "-o", help="Caminho do container .qgh cifrado"),
-    pubkey_path: Path = typer.Option(..., "--pubkey", "-p", help="Caminho da chave pública PQC (.pub)"),
+    input_file: Path = typer.Option(
+        ..., "--input", "-i", help="Arquivo genômico de entrada (FASTQ/BAM/VCF)"
+    ),
+    output_file: Path = typer.Option(
+        ..., "--output", "-o", help="Caminho do container .qgh cifrado"
+    ),
+    pubkey_path: Path = typer.Option(
+        ..., "--pubkey", "-p", help="Caminho da chave pública PQC (.pub)"
+    ),
     algorithm: str = typer.Option("ML-KEM-768", "--alg", "-a", help="Variante PQC"),
 ) -> None:
     """Cifra arquivo genômico via Criptografia de Envelope PQC."""
@@ -50,18 +62,28 @@ def encrypt(
 
     pk_bytes = pubkey_path.read_bytes()
 
-    console.print(f"[bold yellow]Iniciando Criptografia de Envelope:[/bold yellow] {input_file}")
+    console.print(
+        f"[bold yellow]Iniciando Criptografia de Envelope:[/bold yellow] {input_file}"
+    )
     with open(input_file, "rb") as f_in, open(output_file, "wb") as f_out:
         encrypt_genomic_stream(f_in, f_out, pk_bytes, algorithm)
 
-    console.print(f"[bold green]Arquivo Genômico Protegido com Sucesso:[/bold green] {output_file}")
+    console.print(
+        f"[bold green]Arquivo Genômico Protegido com Sucesso:[/bold green] {output_file}"
+    )
 
 
 @app.command("decrypt")
 def decrypt(
-    input_file: Path = typer.Option(..., "--input", "-i", help="Container .qgh cifrado"),
-    output_file: Path = typer.Option(..., "--output", "-o", help="Caminho do arquivo genômico restaurado"),
-    seckey_path: Path = typer.Option(..., "--seckey", "-k", help="Caminho da chave privada PQC (.key)"),
+    input_file: Path = typer.Option(
+        ..., "--input", "-i", help="Container .qgh cifrado"
+    ),
+    output_file: Path = typer.Option(
+        ..., "--output", "-o", help="Caminho do arquivo genômico restaurado"
+    ),
+    seckey_path: Path = typer.Option(
+        ..., "--seckey", "-k", help="Caminho da chave privada PQC (.key)"
+    ),
 ) -> None:
     """Desembala o container e restaura o arquivo genômico original."""
     if not input_file.exists():
@@ -70,11 +92,15 @@ def decrypt(
 
     sk_bytes = seckey_path.read_bytes()
 
-    console.print(f"[bold yellow]Iniciando Decapsulamento e Decifragem:[/bold yellow] {input_file}")
+    console.print(
+        f"[bold yellow]Iniciando Decapsulamento e Decifragem:[/bold yellow] {input_file}"
+    )
     with open(input_file, "rb") as f_in, open(output_file, "wb") as f_out:
         decrypt_genomic_stream(f_in, f_out, sk_bytes)
 
-    console.print(f"[bold green]Arquivo Genômico Restaurado com Sucesso:[/bold green] {output_file}")
+    console.print(
+        f"[bold green]Arquivo Genômico Restaurado com Sucesso:[/bold green] {output_file}"
+    )
 
 
 if __name__ == "__main__":

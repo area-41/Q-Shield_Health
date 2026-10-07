@@ -2,7 +2,9 @@
 
 import os
 from typing import BinaryIO
+
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
 from qshield.crypto.engine import (
     ALG_MLKEM768_AES256GCM,
     MAGIC_BYTES,
@@ -29,7 +31,7 @@ def encrypt_genomic_stream(
         algorithm: Variante do ML-KEM ('ML-KEM-768' ou 'ML-KEM-1024').
     """
     kek_ciphertext, dek = encapsulate_dek(public_key, algorithm)
-    
+
     # Gerar Nonce CSPRNG de 12 bytes para AES-256-GCM
     nonce = os.urandom(12)
     aesgcm = AESGCM(dek)
@@ -53,10 +55,10 @@ def encrypt_genomic_stream(
         chunk = input_stream.read(CHUNK_SIZE)
         if not chunk:
             break
-        
+
         aad = offset.to_bytes(8, byteorder="big")
         encrypted_chunk = aesgcm.encrypt(nonce, chunk, aad)
-        
+
         # Grava tamanho do chunk cifrado + dados
         output_stream.write(len(encrypted_chunk).to_bytes(4, byteorder="big"))
         output_stream.write(encrypted_chunk)
@@ -104,10 +106,10 @@ def decrypt_genomic_stream(
         chunk_len_bytes = input_stream.read(4)
         if not chunk_len_bytes:
             break
-        
+
         chunk_len = int.from_bytes(chunk_len_bytes, byteorder="big")
         encrypted_chunk = input_stream.read(chunk_len)
-        
+
         aad = offset.to_bytes(8, byteorder="big")
         decrypted_chunk = aesgcm.decrypt(nonce, encrypted_chunk, aad)
         output_stream.write(decrypted_chunk)

@@ -3,9 +3,11 @@
 import os
 import time
 from pathlib import Path
+
 import psutil
+
 from qshield.crypto.engine import generate_pqc_keypair
-from qshield.io.stream import decrypt_genomic_stream, encrypt_genomic_stream
+from qshield.io.stream import encrypt_genomic_stream
 
 
 def run_benchmark(file_size_mb: int) -> None:
@@ -16,8 +18,7 @@ def run_benchmark(file_size_mb: int) -> None:
     print(f"\n--- Gerando arquivo sintético de {file_size_mb} MB ---")
     chunk_1mb = os.urandom(1024 * 1024)
     with open(dummy_file, "wb") as f:
-        for _ in range(file_size_mb):
-            f.write(chunk_1mb)
+        f.writelines(chunk_1mb for _ in range(file_size_mb))
 
     kp = generate_pqc_keypair("ML-KEM-768")
     process = psutil.Process(os.getpid())
@@ -33,7 +34,9 @@ def run_benchmark(file_size_mb: int) -> None:
     mem_after = process.memory_info().rss / (1024 * 1024)
     ram_usage = mem_after - mem_before
 
-    print(f"Encriptação Envelopada: {enc_time:.4f} seg | Throughput: {file_size_mb / enc_time:.2f} MB/s")
+    print(
+        f"Encriptação Envelopada: {enc_time:.4f} seg | Throughput: {file_size_mb / enc_time:.2f} MB/s"
+    )
     print(f"Overhead Máximo de Memória RAM: {ram_usage:.2f} MB")
 
     # Limpeza dos Arquivos de Teste

@@ -3,6 +3,6 @@
 from qshield.io.stream import decrypt_genomic_stream, encrypt_genomic_stream
 
 __all__ = [
-    "encrypt_genomic_stream",
     "decrypt_genomic_stream",
+    "encrypt_genomic_stream",
 ]

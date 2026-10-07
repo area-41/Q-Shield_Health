@@ -1,8 +1,9 @@
 """Script de Teste de Integração End-to-End (E2E) para o Q-Shield Health."""
 
 import hashlib
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
 from qshield.crypto.engine import generate_pqc_keypair
 from qshield.io.stream import decrypt_genomic_stream, encrypt_genomic_stream
 
@@ -62,8 +63,12 @@ def run_e2e_test() -> None:
         print(f"5. Arquivo restaurado. SHA-256: {restored_hash}")
 
         # 5. Validação de Integridade
-        assert original_hash == restored_hash, "FALHA: Os hashes SHA-256 não correspondem!"
-        print("\nSUCESSO: Os hashes SHA-256 são exatamente idênticos! Teste concluído com êxito.")
+        assert original_hash == restored_hash, (
+            "FALHA: Os hashes SHA-256 não correspondem!"
+        )
+        print(
+            "\nSUCESSO: Os hashes SHA-256 são exatamente idênticos! Teste concluído com êxito."
+        )
 
 
 if __name__ == "__main__":

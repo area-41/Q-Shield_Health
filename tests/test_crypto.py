@@ -1,6 +1,7 @@
 """Testes unitários para a engine criptográfica ML-KEM e AES-256-GCM."""
 
 import pytest
+
 from qshield.crypto.engine import (
     KeyGenError,
     decapsulate_dek,

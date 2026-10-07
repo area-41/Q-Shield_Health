@@ -8,8 +8,8 @@ from qshield.crypto.engine import (
 )
 
 __all__ = [
-    "generate_pqc_keypair",
-    "encapsulate_dek",
-    "decapsulate_dek",
     "Keypair",
+    "decapsulate_dek",
+    "encapsulate_dek",
+    "generate_pqc_keypair",
 ]

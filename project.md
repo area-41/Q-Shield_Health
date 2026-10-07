@@ -254,7 +254,9 @@ def generate_pqc_keypair(algorithm: str = "ML-KEM-768") -> Keypair:
         raise KeyGenError(f"Falha ao gerar par de chaves ML-KEM: {err}") from err
 
 
-def encapsulate_dek(public_key: bytes, algorithm: str = "ML-KEM-768") -> Tuple[bytes, bytes]:
+def encapsulate_dek(
+    public_key: bytes, algorithm: str = "ML-KEM-768"
+) -> Tuple[bytes, bytes]:
     """Encapsula uma Chave de Criptografia de Dados (DEK) usando ML-KEM.
 
     Args:
@@ -270,7 +272,9 @@ def encapsulate_dek(public_key: bytes, algorithm: str = "ML-KEM-768") -> Tuple[b
         return ciphertext, shared_secret
 
 
-def decapsulate_dek(ciphertext: bytes, secret_key: bytes, algorithm: str = "ML-KEM-768") -> bytes:
+def decapsulate_dek(
+    ciphertext: bytes, secret_key: bytes, algorithm: str = "ML-KEM-768"
+) -> bytes:
     """Decapsula a chave simétrica DEK utilizando a chave secreta PQC.
 
     Args:
@@ -285,7 +289,6 @@ def decapsulate_dek(ciphertext: bytes, secret_key: bytes, algorithm: str = "ML-K
     with oqs.KeyEncapsulation(oqs_name, secret_key=secret_key) as kem:
         shared_secret = kem.decap_secret(ciphertext)
         return shared_secret
-
 ```
 
 ---
@@ -324,7 +327,7 @@ def encrypt_genomic_stream(
         algorithm: Variante do ML-KEM ('ML-KEM-768' ou 'ML-KEM-1024').
     """
     kek_ciphertext, dek = encapsulate_dek(public_key, algorithm)
-    
+
     # Gerar Nonce CSPRNG de 12 bytes para AES-256-GCM
     nonce = os.urandom(12)
     aesgcm = AESGCM(dek)
@@ -348,10 +351,10 @@ def encrypt_genomic_stream(
         chunk = input_stream.read(CHUNK_SIZE)
         if not chunk:
             break
-        
+
         aad = offset.to_bytes(8, byteorder="big")
         encrypted_chunk = aesgcm.encrypt(nonce, chunk, aad)
-        
+
         # Grava tamanho do chunk cifrado + dados
         output_stream.write(len(encrypted_chunk).to_bytes(4, byteorder="big"))
         output_stream.write(encrypted_chunk)
@@ -399,17 +402,16 @@ def decrypt_genomic_stream(
         chunk_len_bytes = input_stream.read(4)
         if not chunk_len_bytes:
             break
-        
+
         chunk_len = int.from_bytes(chunk_len_bytes, byteorder="big")
         encrypted_chunk = input_stream.read(chunk_len)
-        
+
         aad = offset.to_bytes(8, byteorder="big")
         decrypted_chunk = aesgcm.decrypt(nonce, encrypted_chunk, aad)
         output_stream.write(decrypted_chunk)
         offset += 1
 
     del dek
-
 ```
 
 ---
@@ -435,8 +437,12 @@ console = Console()
 
 @app.command("keygen")
 def keygen(
-    out_dir: Path = typer.Option(Path("."), "--out", "-o", help="Diretório de saída das chaves"),
-    algorithm: str = typer.Option("ML-KEM-768", "--alg", "-a", help="Algoritmo PQC (ML-KEM-768 / ML-KEM-1024)"),
+    out_dir: Path = typer.Option(
+        Path("."), "--out", "-o", help="Diretório de saída das chaves"
+    ),
+    algorithm: str = typer.Option(
+        "ML-KEM-768", "--alg", "-a", help="Algoritmo PQC (ML-KEM-768 / ML-KEM-1024)"
+    ),
 ) -> None:
     """Gera um par de chaves pós-quânticas ML-KEM."""
     console.print(f"[bold blue]Gerando par de chaves PQC ({algorithm})...[/bold blue]")
@@ -457,9 +463,15 @@ def keygen(
 
 @app.command("encrypt")
 def encrypt(
-    input_file: Path = typer.Option(..., "--input", "-i", help="Arquivo genômico de entrada (FASTQ/BAM/VCF)"),
-    output_file: Path = typer.Option(..., "--output", "-o", help="Caminho do container .qgh cifrado"),
-    pubkey_path: Path = typer.Option(..., "--pubkey", "-p", help="Caminho da chave pública PQC (.pub)"),
+    input_file: Path = typer.Option(
+        ..., "--input", "-i", help="Arquivo genômico de entrada (FASTQ/BAM/VCF)"
+    ),
+    output_file: Path = typer.Option(
+        ..., "--output", "-o", help="Caminho do container .qgh cifrado"
+    ),
+    pubkey_path: Path = typer.Option(
+        ..., "--pubkey", "-p", help="Caminho da chave pública PQC (.pub)"
+    ),
     algorithm: str = typer.Option("ML-KEM-768", "--alg", "-a", help="Variante PQC"),
 ) -> None:
     """Cifra arquivo genômico via Criptografia de Envelope PQC."""
@@ -469,18 +481,28 @@ def encrypt(
 
     pk_bytes = pubkey_path.read_bytes()
 
-    console.print(f"[bold yellow]Iniciando Criptografia de Envelope:[/bold yellow] {input_file}")
+    console.print(
+        f"[bold yellow]Iniciando Criptografia de Envelope:[/bold yellow] {input_file}"
+    )
     with open(input_file, "rb") as f_in, open(output_file, "wb") as f_out:
         encrypt_genomic_stream(f_in, f_out, pk_bytes, algorithm)
 
-    console.print(f"[bold green]Arquivo Genômico Protegido com Sucesso:[/bold green] {output_file}")
+    console.print(
+        f"[bold green]Arquivo Genômico Protegido com Sucesso:[/bold green] {output_file}"
+    )
 
 
 @app.command("decrypt")
 def decrypt(
-    input_file: Path = typer.Option(..., "--input", "-i", help="Container .qgh cifrado"),
-    output_file: Path = typer.Option(..., "--output", "-o", help="Caminho do arquivo genômico restaurado"),
-    seckey_path: Path = typer.Option(..., "--seckey", "-k", help="Caminho da chave privada PQC (.key)"),
+    input_file: Path = typer.Option(
+        ..., "--input", "-i", help="Container .qgh cifrado"
+    ),
+    output_file: Path = typer.Option(
+        ..., "--output", "-o", help="Caminho do arquivo genômico restaurado"
+    ),
+    seckey_path: Path = typer.Option(
+        ..., "--seckey", "-k", help="Caminho da chave privada PQC (.key)"
+    ),
 ) -> None:
     """Desembala o container e restaura o arquivo genômico original."""
     if not input_file.exists():
@@ -489,16 +511,19 @@ def decrypt(
 
     sk_bytes = seckey_path.read_bytes()
 
-    console.print(f"[bold yellow]Iniciando Decapsulamento e Decifragem:[/bold yellow] {input_file}")
+    console.print(
+        f"[bold yellow]Iniciando Decapsulamento e Decifragem:[/bold yellow] {input_file}"
+    )
     with open(input_file, "rb") as f_in, open(output_file, "wb") as f_out:
         decrypt_genomic_stream(f_in, f_out, sk_bytes)
 
-    console.print(f"[bold green]Arquivo Genômico Restaurado com Sucesso:[/bold green] {output_file}")
+    console.print(
+        f"[bold green]Arquivo Genômico Restaurado com Sucesso:[/bold green] {output_file}"
+    )
 
 
 if __name__ == "__main__":
     app()
-
 ```
 
 ---
@@ -543,7 +568,9 @@ def run_benchmark(file_size_mb: int) -> None:
     mem_after = process.memory_info().rss / (1024 * 1024)
     ram_usage = mem_after - mem_before
 
-    print(f"Encriptação Envelopada: {enc_time:.4f} seg | Throughput: {file_size_mb / enc_time:.2f} MB/s")
+    print(
+        f"Encriptação Envelopada: {enc_time:.4f} seg | Throughput: {file_size_mb / enc_time:.2f} MB/s"
+    )
     print(f"Overhead Máximo de Memória RAM: {ram_usage:.2f} MB")
 
     # Limpeza dos Arquivos de Teste
@@ -554,7 +581,6 @@ def run_benchmark(file_size_mb: int) -> None:
 if __name__ == "__main__":
     for size in [100, 1000]:  # Executar com 100MB e 1GB
         run_benchmark(size)
-
 ```
 
 ---

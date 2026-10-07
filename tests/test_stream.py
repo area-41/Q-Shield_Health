@@ -1,8 +1,9 @@
 """Testes de integração para criptografia/desencriptação em streaming (.qgh)."""
 
 import io
-import os
+
 import pytest
+
 from qshield.crypto.engine import generate_pqc_keypair
 from qshield.io.stream import decrypt_genomic_stream, encrypt_genomic_stream
 
@@ -11,7 +12,8 @@ def test_genomic_stream_roundtrip() -> None:
     """Testa a integridade completa de ponta a ponta na cifragem/decifragem de um stream."""
     # Gera dados genômicos sintéticos simulando um arquivo FASTQ
     sample_data = (
-        b"@SEQ_ID_001\nGATCGATCGATCGATCGATCGATCGATC\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIII\n" * 100
+        b"@SEQ_ID_001\nGATCGATCGATCGATCGATCGATCGATC\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIII\n"
+        * 100
     )
 
     input_stream = io.BytesIO(sample_data)
